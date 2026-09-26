@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StudentService } from '../../core/services/student.service';
 import { QrService } from '../../core/services/qr.service';
 import { ToastService } from '../../core/services/toast.service';
-import { Student, Branch, Batch, Mentor } from '../../models';
+import { Student, Branch, Batch, Mentor, HOD } from '../../models';
 
 import { AuthService } from '../../core/auth/auth.service';
 
@@ -13,12 +13,13 @@ import { AuthService } from '../../core/auth/auth.service';
   styleUrls: ['./student-management.component.scss']
 })
 export class StudentManagementComponent implements OnInit {
-  activeTab: 'students' | 'mentors' = 'students';
+  activeTab: 'students' | 'mentors' | 'hods' = 'students';
 
   students: Student[] = [];
   branches: Branch[] = [];
   batches: Batch[] = [];
   mentors: Mentor[] = [];
+  hods: HOD[] = [];
 
   // Filters & Search
   searchTerm: string = '';
@@ -32,12 +33,16 @@ export class StudentManagementComponent implements OnInit {
   showAddMentorModal = false;
   editingMentor: Mentor | null = null;
 
+  showAddHODModal = false;
+  editingHOD: HOD | null = null;
+
   showQRModal = false;
   selectedStudentForQR: Student | null = null;
   qrPreviewDataUrl: string = '';
 
   studentForm: FormGroup;
   mentorForm: FormGroup;
+  hodForm: FormGroup;
 
   constructor(
     private studentService: StudentService,
@@ -67,6 +72,14 @@ export class StudentManagementComponent implements OnInit {
       employee_id: ['EMP-M101', Validators.required],
       branch_id: ['', Validators.required]
     });
+
+    this.hodForm = this.fb.group({
+      full_name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['techwing@123', [Validators.required, Validators.minLength(6)]],
+      employee_id: ['EMP-H101', Validators.required],
+      branch_id: ['', Validators.required]
+    });
   }
 
   ngOnInit(): void {
@@ -77,6 +90,7 @@ export class StudentManagementComponent implements OnInit {
     this.studentService.branches$.subscribe(b => this.branches = b);
     this.studentService.batches$.subscribe(bt => this.batches = bt);
     this.studentService.mentors$.subscribe(m => this.mentors = m);
+    this.studentService.hods$.subscribe(h => this.hods = h);
     this.refreshStudents();
   }
 
@@ -196,10 +210,11 @@ export class StudentManagementComponent implements OnInit {
 
   openEditMentorModal(mentor: Mentor): void {
     this.editingMentor = mentor;
+    const currentPass = this.authService.getUserPassword(mentor.email);
     this.mentorForm.patchValue({
       full_name: mentor.full_name,
       email: mentor.email,
-      password: 'techwing@123',
+      password: currentPass,
       employee_id: mentor.employee_id,
       branch_id: mentor.branch_id
     });
@@ -241,6 +256,68 @@ export class StudentManagementComponent implements OnInit {
     if (confirm(`Are you sure you want to delete mentor ${mentor.full_name} (${mentor.email})?`)) {
       await this.studentService.deleteMentor(mentor.id);
       this.toastService.showSuccess(`Deleted mentor ${mentor.full_name}`);
+    }
+  }
+
+  // HOD Actions
+  openAddHODModal(): void {
+    this.editingHOD = null;
+    this.hodForm.reset({
+      password: 'techwing@123',
+      employee_id: `EMP-H${Math.floor(100 + Math.random() * 900)}`,
+      branch_id: this.branches[0]?.id || ''
+    });
+    this.showAddHODModal = true;
+  }
+
+  openEditHODModal(hod: HOD): void {
+    this.editingHOD = hod;
+    const currentPass = this.authService.getUserPassword(hod.email);
+    this.hodForm.patchValue({
+      full_name: hod.full_name,
+      email: hod.email,
+      password: currentPass,
+      employee_id: hod.employee_id,
+      branch_id: hod.branch_id
+    });
+    this.showAddHODModal = true;
+  }
+
+  closeAddHODModal(): void {
+    this.showAddHODModal = false;
+    this.editingHOD = null;
+  }
+
+  async saveHOD(): Promise<void> {
+    if (this.hodForm.invalid) {
+      this.toastService.showError('Please fill in all required HOD fields');
+      return;
+    }
+    const val = this.hodForm.value;
+
+    if (this.editingHOD) {
+      const res = await this.studentService.updateHOD(this.editingHOD.id, val, val.password);
+      if (res.error) {
+        this.toastService.showError(res.error);
+      } else {
+        this.toastService.showSuccess(`HOD ${res.hod?.full_name} updated successfully!`);
+        this.closeAddHODModal();
+      }
+    } else {
+      const res = this.studentService.addHOD(val, val.password);
+      if (res.error) {
+        this.toastService.showError(res.error);
+      } else {
+        this.toastService.showSuccess(`HOD ${res.hod?.full_name} created successfully! Username: ${val.email}`);
+        this.closeAddHODModal();
+      }
+    }
+  }
+
+  async deleteHOD(hod: HOD): Promise<void> {
+    if (confirm(`Are you sure you want to delete HOD ${hod.full_name} (${hod.email})?`)) {
+      await this.studentService.deleteHOD(hod.id);
+      this.toastService.showSuccess(`Deleted HOD ${hod.full_name}`);
     }
   }
 
