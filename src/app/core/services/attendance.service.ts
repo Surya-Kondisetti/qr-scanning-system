@@ -15,6 +15,8 @@ import {
   CorrectionStatus
 } from '../../models';
 
+import { NotificationService } from './notification.service';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -30,7 +32,8 @@ export class AttendanceService {
 
   constructor(
     private supabase: SupabaseService,
-    private studentService: StudentService
+    private studentService: StudentService,
+    private notificationService: NotificationService
   ) {
     this.initAttendanceData();
   }
@@ -178,6 +181,12 @@ export class AttendanceService {
         if (error) console.warn('Supabase attendance sync error:', error.message || error);
       });
     }
+
+    this.notificationService.addNotification(
+      'attendance_marked',
+      'Attendance Verified',
+      `Present verification recorded for ${student.full_name} (${student.roll_number}) [${session.toUpperCase()}]`
+    );
 
     return {
       success: true,

@@ -87,16 +87,23 @@
         <div class="notifications-dropdown" *ngIf="showNotifications">
           <div class="dropdown-header">
             <h4>Notifications</h4>
-            <span class="badge badge--primary">3 New</span>
+            <div class="d-flex align-center gap-2">
+              <span class="badge badge--primary" *ngIf="unreadNotificationsCount > 0">{{ unreadNotificationsCount }} New</span>
+              <button class="btn btn--xs btn--ghost" (click)="markAllNotificationsRead()" title="Mark all as read">Read All</button>
+            </div>
           </div>
           <div class="notification-list">
-            <div class="notification-item" *ngFor="let item of notifications">
+            <div class="notification-item" *ngFor="let item of notificationsList" [class.read]="item.is_read" (click)="markNotificationRead(item.id)">
               <div class="noti-indicator" [class]="item.type"></div>
               <div class="noti-content">
                 <div class="noti-title">{{ item.title }}</div>
                 <div class="noti-msg">{{ item.message }}</div>
-                <div class="noti-time">{{ item.time }}</div>
+                <div class="noti-time">{{ item.created_at | date:'shortTime' }}</div>
               </div>
+            </div>
+
+            <div class="p-4 text-center text-xs text-muted" *ngIf="notificationsList.length === 0">
+              No notifications at this time.
             </div>
           </div>
         </div>
@@ -132,6 +139,107 @@
     </div>
   </div>
 </header>
+
+<!-- Native-like Mobile Bottom Navigation Dock (Visible on mobile viewports < 768px) -->
+<nav class="mobile-app-dock" *ngIf="currentUser">
+  <ng-container [ngSwitch]="currentUser.role">
+    <!-- Admin Dock -->
+    <ng-container *ngSwitchCase="'admin'">
+      <a routerLink="/admin/dashboard" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-grid-fill"></i>
+        <span>Home</span>
+      </a>
+      <a routerLink="/admin/students" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-people-fill"></i>
+        <span>Students</span>
+      </a>
+      <a routerLink="/admin/qr-designer" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-qr-code-scan"></i>
+        <span>QR Studio</span>
+      </a>
+      <a routerLink="/admin/attendance" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-calendar-check-fill"></i>
+        <span>Attendance</span>
+      </a>
+      <a class="dock-item" (click)="openProfileModal()">
+        <i class="bi bi-person-fill"></i>
+        <span>Profile</span>
+      </a>
+    </ng-container>
+
+    <!-- Mentor Dock -->
+    <ng-container *ngSwitchCase="'mentor'">
+      <a routerLink="/mentor/dashboard" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-grid-fill"></i>
+        <span>Dashboard</span>
+      </a>
+      <a routerLink="/mentor/scanner" routerLinkActive="active" class="dock-item highlight">
+        <i class="bi bi-qr-code-scan"></i>
+        <span>Scan QR</span>
+      </a>
+      <a routerLink="/mentor/today" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-list-check"></i>
+        <span>Today</span>
+      </a>
+      <a routerLink="/mentor/corrections" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-check2-square"></i>
+        <span>Fixes</span>
+      </a>
+      <a class="dock-item" (click)="openProfileModal()">
+        <i class="bi bi-person-fill"></i>
+        <span>Profile</span>
+      </a>
+    </ng-container>
+
+    <!-- HOD Dock -->
+    <ng-container *ngSwitchCase="'hod'">
+      <a routerLink="/hod/dashboard" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-grid-fill"></i>
+        <span>Home</span>
+      </a>
+      <a routerLink="/hod/department" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-building-fill"></i>
+        <span>Dept</span>
+      </a>
+      <a routerLink="/hod/alerts" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>Alerts</span>
+      </a>
+      <a routerLink="/hod/reports" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-bar-chart-fill"></i>
+        <span>Reports</span>
+      </a>
+      <a class="dock-item" (click)="openProfileModal()">
+        <i class="bi bi-person-fill"></i>
+        <span>Profile</span>
+      </a>
+    </ng-container>
+
+    <!-- Student Dock -->
+    <ng-container *ngSwitchCase="'student'">
+      <a routerLink="/student/dashboard" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-grid-fill"></i>
+        <span>Home</span>
+      </a>
+      <a routerLink="/student/my-qr" routerLinkActive="active" class="dock-item highlight">
+        <i class="bi bi-qr-code"></i>
+        <span>My QR</span>
+      </a>
+      <a routerLink="/student/calendar" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-calendar-range-fill"></i>
+        <span>Streak</span>
+      </a>
+      <a routerLink="/student/history" routerLinkActive="active" class="dock-item">
+        <i class="bi bi-clock-history"></i>
+        <span>History</span>
+      </a>
+      <a class="dock-item" (click)="openProfileModal()">
+        <i class="bi bi-person-fill"></i>
+        <span>Profile</span>
+      </a>
+    </ng-container>
+  </ng-container>
+</nav>
 
 <!-- Edit Profile & Security Modal -->
 <div class="modal-overlay" *ngIf="showProfileModal" (click)="closeProfileModal()">

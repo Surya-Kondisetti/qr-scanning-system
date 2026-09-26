@@ -23,7 +23,7 @@
 
   <ng-container *ngIf="student">
     <!-- Header -->
-    <div class="page-header">
+    <div class="page-header" id="dashboard-section">
       <div class="page-header__info">
         <h1 class="page-title">Welcome, {{ student.full_name }}! 👋</h1>
         <p class="page-subtitle">Roll No: <strong>{{ student.roll_number }}</strong> • {{ student.branch?.name }} • {{ student.batch?.name }} • Course: <strong class="text-primary">{{ student.combo_name || 'AWS + AGENTIC-AI' }}</strong></p>
@@ -88,7 +88,7 @@
     <!-- Main Grid: Attendance Calendar Heatmap + Personal QR Pass Card -->
     <div class="d-grid gap-6" style="grid-template-columns: 2fr 1fr;">
       <!-- Calendar & History Card -->
-      <div class="tw-card">
+      <div class="tw-card" id="calendar-section">
         <div class="tw-card__header">
           <div>
             <div class="tw-card__title">Attendance Calendar & Heatmap</div>
@@ -121,7 +121,7 @@
           </div>
 
           <!-- History Table -->
-          <h4 class="mb-3">Detailed Day-by-Day Log</h4>
+          <h4 class="mb-3" id="history-section">Detailed Day-by-Day Log & Past Months</h4>
           <div class="tw-table-wrapper">
             <table class="tw-table">
               <thead>
@@ -158,7 +158,7 @@
       </div>
 
       <!-- Student Skill Sync Pass Card -->
-      <div class="tw-card">
+      <div class="tw-card" id="my-qr-section">
         <div class="tw-card__header">
           <div class="tw-card__title">Skill Sync Pass</div>
         </div>

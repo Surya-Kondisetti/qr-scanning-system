@@ -2378,3 +2378,170 @@ select.form-control {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+// =====================================================
+// COMPREHENSIVE RESPONSIVE DESIGN FOR ALL SCREEN SIZES
+// (Mobile, Tablet, Laptop, Desktop, & Touch Devices)
+// =====================================================
+
+@media (max-width: 1200px) {
+  .app-content, 
+  .student-dashboard-page, 
+  .student-management-page, 
+  .mentor-dashboard-page, 
+  .hod-dashboard-page, 
+  .admin-dashboard-page {
+    padding: 20px 16px !important;
+  }
+
+  /* Switch 2-column main grid layouts to stacked single-column */
+  .d-grid[style*="2fr 1fr"], 
+  .d-grid[style*="1fr 2fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 992px) {
+  /* Page Header responsive flex wrapping */
+  .page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+
+    .page-header__actions {
+      width: 100% !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 10px !important;
+
+      .btn, a {
+        flex: 1 1 auto !important;
+        justify-content: center !important;
+        text-align: center !important;
+      }
+    }
+  }
+
+  /* Filter bar & search layout responsiveness */
+  .filter-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+
+    .filter-bar__search, 
+    .filter-bar__filters {
+      width: 100% !important;
+      flex-wrap: wrap !important;
+
+      select, input, .dropdown-batch-zip {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+    }
+  }
+
+  /* Tab Navigation touch scrollbar */
+  .tabs-navigation {
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    padding-bottom: 8px !important;
+    -webkit-overflow-scrolling: touch;
+
+    .btn {
+      flex-shrink: 0 !important;
+    }
+  }
+
+  /* Universal Card & Modal Responsiveness */
+  .modal-card, 
+  .modal-dialog {
+    max-width: 95vw !important;
+    margin: 10px auto !important;
+    border-radius: 16px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Form grid 2-column layouts to 1-column on mobile */
+  .d-grid[style*="grid-template-columns: 1fr 1fr"],
+  .d-grid[style*="grid-template-columns:1fr 1fr"],
+  .d-grid[style*="1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .modal-body .d-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+
+    .full-width {
+      grid-column: span 1 !important;
+    }
+  }
+
+  /* Stats grid responsive scaling */
+  .d-grid[style*="repeat(auto-fit"] {
+    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr)) !important;
+  }
+
+  .stat-card {
+    padding: 16px !important;
+
+    .stat-card__value {
+      font-size: 1.4rem !important;
+    }
+  }
+
+  /* Search & Lookup input group stacking */
+  .lookup-input-group {
+    flex-direction: column !important;
+
+    .btn {
+      width: 100% !important;
+    }
+  }
+
+  /* Table horizontal scroll container */
+  .tw-table-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+
+    .tw-table {
+      min-width: 650px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 0.875rem !important;
+  }
+
+  .page-title {
+    font-size: 1.35rem !important;
+  }
+
+  .page-subtitle {
+    font-size: 0.8rem !important;
+  }
+
+  .btn {
+    padding: 8px 12px !important;
+    font-size: 0.825rem !important;
+  }
+
+  .btn--lg, .btn--xl {
+    padding: 10px 16px !important;
+    font-size: 0.875rem !important;
+  }
+
+  .modal-header {
+    padding: 14px 16px !important;
+  }
+
+  .modal-body {
+    padding: 14px !important;
+  }
+}

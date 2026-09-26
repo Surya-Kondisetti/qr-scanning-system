@@ -12,6 +12,9 @@
       <button class="btn btn--warning" (click)="openAddMentorModal()">
         <i class="bi bi-person-badge-fill me-1"></i> Add Mentor
       </button>
+      <button class="btn btn--info" (click)="openAddHODModal()">
+        <i class="bi bi-person-workspace me-1"></i> Add HOD
+      </button>
       <a routerLink="/admin/import" class="btn btn--secondary">
         <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> Bulk Import Excel
       </a>
@@ -21,13 +24,16 @@
     </div>
   </div>
 
-  <!-- Navigation Tabs (Students vs Mentors) -->
+  <!-- Navigation Tabs (Students vs Mentors vs HODs) -->
   <div class="tabs-navigation mb-6 d-flex gap-3 border-b pb-3">
     <button class="btn btn--sm" [class.btn--primary]="activeTab === 'students'" [class.btn--ghost]="activeTab !== 'students'" (click)="activeTab = 'students'">
       <i class="bi bi-people-fill"></i> Students Directory ({{ students.length }})
     </button>
     <button class="btn btn--sm" [class.btn--primary]="activeTab === 'mentors'" [class.btn--ghost]="activeTab !== 'mentors'" (click)="activeTab = 'mentors'">
       <i class="bi bi-person-badge-fill"></i> Mentors Directory ({{ mentors.length }})
+    </button>
+    <button class="btn btn--sm" [class.btn--primary]="activeTab === 'hods'" [class.btn--ghost]="activeTab !== 'hods'" (click)="activeTab = 'hods'">
+      <i class="bi bi-person-workspace"></i> HOD Directory ({{ hods.length }})
     </button>
   </div>
 
@@ -177,6 +183,60 @@
     </div>
   </div>
 
+  <!-- TAB 3: HODS DATA TABLE -->
+  <div class="tw-card" *ngIf="activeTab === 'hods'">
+    <div class="tw-card__body p-0">
+      <div class="tw-table-wrapper">
+        <table class="tw-table">
+          <thead>
+            <tr>
+              <th>HOD Details</th>
+              <th>Employee ID</th>
+              <th>Username / Email</th>
+              <th>Department / Branch</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let h of hods">
+              <td>
+                <div class="d-flex align-center gap-3">
+                  <div class="student-avatar" style="background: rgba(20, 184, 166, 0.15); color: #0D9488;">
+                    {{ h.full_name.charAt(0) }}
+                  </div>
+                  <div>
+                    <div class="cell-primary">{{ h.full_name }}</div>
+                    <div class="cell-secondary">Head of Department (HOD)</div>
+                  </div>
+                </div>
+              </td>
+              <td class="font-bold text-dark">{{ h.employee_id }}</td>
+              <td class="font-mono text-sm text-primary">{{ h.email }}</td>
+              <td><span class="badge badge--no-dot badge--info">{{ h.branch?.code || 'CSE' }}</span> {{ h.branch?.name }}</td>
+              <td style="text-align: right;">
+                <div class="d-flex justify-end gap-2">
+                  <button class="btn btn--sm btn--icon btn--ghost text-primary" (click)="openEditHODModal(h)" title="Edit HOD Details">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                  <button class="btn btn--sm btn--icon btn--ghost text-danger" (click)="deleteHOD(h)" title="Delete HOD">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="hods.length === 0">
+              <td colspan="5" class="text-center py-8 text-muted">
+                <i class="bi bi-person-workspace display-6 d-block mb-2"></i>
+                No HODs created yet. Click "+ Add HOD" button above to add a new HOD.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- Add / Edit Student Modal -->
   <div class="modal-backdrop" *ngIf="showAddModal">
     <div class="modal-card">
@@ -296,6 +356,55 @@
     <div class="modal-footer">
       <button class="btn btn--secondary" (click)="closeAddMentorModal()">Cancel</button>
       <button class="btn btn--primary" (click)="saveMentor()">{{ editingMentor ? 'Update Mentor Account' : 'Create Mentor Account' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit HOD Modal -->
+<div class="modal-backdrop" *ngIf="showAddHODModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>{{ editingHOD ? '✏️ Edit HOD Details' : '+ Add New HOD' }}</h3>
+      <button class="btn-close" (click)="closeAddHODModal()">×</button>
+    </div>
+    <div class="modal-body" [formGroup]="hodForm">
+      <div class="d-grid gap-4 mb-4" style="grid-template-columns: 1fr 1fr;">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" class="form-control" formControlName="full_name" placeholder="e.g. Dr. Anita Sharma">
+        </div>
+        <div class="form-group">
+          <label>Employee ID *</label>
+          <input type="text" class="form-control" formControlName="employee_id" placeholder="e.g. EMP-H101">
+        </div>
+      </div>
+
+      <div class="d-grid gap-4 mb-4" style="grid-template-columns: 1fr 1fr;">
+        <div class="form-group">
+          <label>Username / Email *</label>
+          <input type="email" class="form-control" formControlName="email" placeholder="hod@techwing.edu">
+        </div>
+        <div class="form-group">
+          <label>Password *</label>
+          <input type="text" class="form-control" formControlName="password" placeholder="techwing@123">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Department / Branch *</label>
+        <select class="form-control" formControlName="branch_id">
+          <option *ngFor="let br of branches" [value]="br.id">{{ br.code }} - {{ br.name }}</option>
+        </select>
+      </div>
+
+      <p class="text-xs text-muted mt-3 mb-0">
+        <i class="bi bi-info-circle-fill text-primary"></i> 
+        The HOD will be required to change their password on first login after 2FA OTP verification.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn--secondary" (click)="closeAddHODModal()">Cancel</button>
+      <button class="btn btn--primary" (click)="saveHOD()">{{ editingHOD ? 'Update HOD Account' : 'Create HOD Account' }}</button>
     </div>
   </div>
 </div>

@@ -597,3 +597,68 @@
 .text-orange {
   color: #E2661A !important;
 }
+
+/* Mobile Bottom Navigation Dock (Native App-like navigation bar) */
+.mobile-app-dock {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: #110F17;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  z-index: 1500;
+  padding: 4px 8px;
+  align-items: center;
+  justify-content: space-around;
+  backdrop-filter: blur(12px);
+
+  .dock-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    flex: 1;
+
+    i {
+      font-size: 1.25rem;
+    }
+
+    &:hover, &.active {
+      color: #FFD329;
+
+      i {
+        transform: translateY(-2px);
+      }
+    }
+
+    &.highlight {
+      color: #E2661A;
+
+      i {
+        font-size: 1.4rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-app-dock {
+    display: flex !important;
+  }
+}
+
+.notification-item.read {
+  opacity: 0.65;
+  background: transparent;
+}

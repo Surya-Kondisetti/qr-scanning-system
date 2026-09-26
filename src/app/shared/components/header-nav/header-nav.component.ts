@@ -7,6 +7,9 @@ import { UserRole } from '../../../models';
 
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
+import { NotificationService } from '../../../core/services/notification.service';
+import { Notification } from '../../../models';
+
 @Component({
   selector: 'app-header-nav',
   templateUrl: './header-nav.component.html',
@@ -17,7 +20,8 @@ export class HeaderNavComponent implements OnInit {
   isDarkMode = false;
   showNotifications = false;
   showUserMenu = false;
-  unreadNotificationsCount = 3;
+  unreadNotificationsCount = 0;
+  notificationsList: Notification[] = [];
 
   // Profile Edit & Password Change Modal State
   showProfileModal = false;
@@ -25,15 +29,10 @@ export class HeaderNavComponent implements OnInit {
   showPass = false;
   savingProfile = false;
 
-  notifications = [
-    { id: 'n1', title: 'Attendance Session Opened', message: 'Morning attendance session is active until 11:00 AM', time: '10 mins ago', type: 'info' },
-    { id: 'n2', title: 'Low Attendance Alert', message: '5 students dropped below 75% threshold in CSE', time: '1 hour ago', type: 'warning' },
-    { id: 'n3', title: 'Monthly Archive Ready', message: 'August 2026 monthly archive is compiled and downloadable', time: 'Yesterday', type: 'success' }
-  ];
-
   constructor(
     public authService: AuthService,
     public themeService: ThemeService,
+    public notificationService: NotificationService,
     private toastService: ToastService,
     private router: Router,
     private fb: FormBuilder
@@ -47,6 +46,14 @@ export class HeaderNavComponent implements OnInit {
     this.themeService.isDarkMode$.subscribe(dark => {
       this.isDarkMode = dark;
     });
+
+    this.notificationService.notifications$.subscribe(list => {
+      this.notificationsList = list;
+    });
+
+    this.notificationService.unreadCount$.subscribe(count => {
+      this.unreadNotificationsCount = count;
+    });
   }
 
   toggleTheme(): void {
@@ -56,6 +63,18 @@ export class HeaderNavComponent implements OnInit {
   toggleNotifications(): void {
     this.showNotifications = !this.showNotifications;
     this.showUserMenu = false;
+  }
+
+  markNotificationRead(id: string): void {
+    this.notificationService.markAsRead(id);
+  }
+
+  markAllNotificationsRead(): void {
+    this.notificationService.markAllAsRead();
+  }
+
+  clearNotifications(): void {
+    this.notificationService.clearAll();
   }
 
   toggleUserMenu(): void {

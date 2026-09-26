@@ -8,6 +8,8 @@ import { Student, AttendanceSummary, DailyAttendance, AttendanceArchive } from '
 
 import { AuthService } from '../../core/auth/auth.service';
 
+import { ActivatedRoute } from '@angular/router';
+
 @Component({
   selector: 'app-student-dashboard',
   templateUrl: './student-dashboard.component.html',
@@ -22,6 +24,7 @@ export class StudentDashboardComponent implements OnInit {
   archives: AttendanceArchive[] = [];
   selectedMonthLabel: string = 'September 2026';
   allStudents: Student[] = [];
+  activeSection: string = 'dashboard';
 
   constructor(
     private studentService: StudentService,
@@ -29,7 +32,8 @@ export class StudentDashboardComponent implements OnInit {
     private qrService: QrService,
     private archiveService: ArchiveService,
     private toastService: ToastService,
-    public authService: AuthService
+    public authService: AuthService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -37,6 +41,25 @@ export class StudentDashboardComponent implements OnInit {
     this.studentService.students$.subscribe(() => this.refreshStudentDashboard());
     this.attendanceService.records$.subscribe(() => this.refreshStudentDashboard());
     this.archives = this.archiveService.getArchives();
+
+    this.route.url.subscribe(urlSegments => {
+      const path = urlSegments[0]?.path || 'dashboard';
+      this.activeSection = path;
+      setTimeout(() => this.scrollToActiveSection(path), 150);
+    });
+  }
+
+  scrollToActiveSection(path: string): void {
+    let targetId = '';
+    if (path === 'my-qr') targetId = 'my-qr-section';
+    else if (path === 'calendar') targetId = 'calendar-section';
+    else if (path === 'history') targetId = 'history-section';
+    else targetId = 'dashboard-section';
+
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   private refreshStudentDashboard(): void {
