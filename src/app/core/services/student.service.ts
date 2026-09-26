@@ -370,6 +370,102 @@ export class StudentService {
     return {};
   }
 
+  addHOD(hodData: Partial<HOD>, password?: string): { hod?: HOD; error?: string } {
+    const existing = this._hods$.value.find(h => h.email.toLowerCase() === hodData.email?.toLowerCase());
+    if (existing) {
+      return { error: `HOD with email ${hodData.email} already exists.` };
+    }
+
+    const newId = `h-${Date.now()}`;
+    const branch = this._branches$.value.find(b => b.id === hodData.branch_id);
+    const newHOD: HOD = {
+      id: newId,
+      user_id: `u-h-${Date.now()}`,
+      employee_id: hodData.employee_id || `EMP-H${Math.floor(100 + Math.random() * 900)}`,
+      full_name: hodData.full_name!,
+      email: hodData.email!,
+      branch_id: hodData.branch_id!,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      branch
+    };
+
+    const current = this._hods$.value;
+    this._hods$.next([newHOD, ...current]);
+
+    const initialPass = password || 'techwing@123';
+    this.authService.registerUserAccount({
+      email: hodData.email!,
+      pass: initialPass,
+      full_name: hodData.full_name!,
+      role: 'hod'
+    });
+
+    if (this.supabase.isConfigured) {
+      const { branch: _b, ...dbHOD } = newHOD;
+      this.supabase.from('hods').insert([dbHOD]).then(({ error }) => {
+        if (error) console.warn('Supabase HOD insert error:', error);
+      });
+    }
+
+    return { hod: newHOD };
+  }
+
+  async updateHOD(id: string, updates: Partial<HOD>, password?: string): Promise<{ hod?: HOD; error?: string }> {
+    const list = [...this._hods$.value];
+    const index = list.findIndex(h => h.id === id);
+    if (index === -1) return { error: 'HOD not found' };
+
+    const updated: HOD = {
+      ...list[index],
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    if (updates.branch_id) updated.branch = this._branches$.value.find(b => b.id === updates.branch_id);
+
+    list[index] = updated;
+    this._hods$.next(list);
+
+    if (password && updated.email) {
+      this.authService.registerUserAccount({
+        email: updated.email,
+        pass: password,
+        full_name: updated.full_name,
+        role: 'hod'
+      });
+    }
+
+    if (this.supabase.isConfigured) {
+      try {
+        const { branch: _b, ...cleanUpdates } = updates;
+        if (Object.keys(cleanUpdates).length > 0) {
+          await this.supabase.from('hods').update(cleanUpdates).eq('id', id);
+        }
+      } catch (e) {
+        console.warn('Supabase HOD update warning:', e);
+      }
+    }
+
+    return { hod: updated };
+  }
+
+  async deleteHOD(id: string): Promise<{ error?: string }> {
+    const list = this._hods$.value.filter(h => h.id !== id);
+    this._hods$.next(list);
+
+    if (this.supabase.isConfigured) {
+      try {
+        await this.supabase.from('hods').delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase HOD delete error:', e);
+      }
+    }
+
+    return {};
+  }
+
   async updateStudent(id: string, updates: Partial<Student>): Promise<{ student?: Student; error?: string }> {
     const list = [...this._students$.value];
     const index = list.findIndex(s => s.id === id);
